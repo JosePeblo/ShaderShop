@@ -1,0 +1,19 @@
+g++ .\src\main.cpp ^
+-I.\vendor\glfw\include ^
+-I.\vendor\imgui ^
+-I.\vendor\imgui\backends ^
+-I.\vendor\glad\include ^
+-I.\vendor\pbgl\include ^
+-I.\vendor\cml ^
+-I.\vendor\stb ^
+-I.\include ^
+-L.\vendor\lib ^
+-lopengl32 ^
+-lglfw3 ^
+-lUser32 ^
+-lGdi32 ^
+-lShell32 ^
+-limgui ^
+-lglad ^
+-lpbgl ^
+-o .\main.exe

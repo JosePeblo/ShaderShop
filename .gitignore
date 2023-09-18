@@ -3,3 +3,6 @@
 *.a
 *.o
 .vscode
+imgui.ini
+*.lib
+a.cpp
