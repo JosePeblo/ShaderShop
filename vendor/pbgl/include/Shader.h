@@ -55,7 +55,7 @@ class Shader
         std::string GetPath() const { return m_filePath; }
         std::unordered_map<std::string, Uniform>& GetUniformCache() { return m_uniformLocationCache; }
 
-    private:
+    protected:
         std::string m_filePath;
         unsigned int m_rendererID;
         mutable std::unordered_map<std::string, Uniform> m_uniformLocationCache;
@@ -66,4 +66,14 @@ class Shader
         GLint GetUniformLocation(const std::string& name) const;
 };
 
-
+class ComputeShader : public Shader {
+    public:
+    ComputeShader(const std::string& filepath);
+    ~ComputeShader()
+    {
+        // Parent destructor deletes the program and uniforms
+    }
+    void Dispatch(uint32_t groups_x, uint32_t groups_y, uint32_t groups_z) const;
+    private:
+        // unsigned int CompileShader(std::string& src);
+};

@@ -316,3 +316,46 @@ unsigned int Shader::CompileShader(unsigned int type, const std::string& source)
 
 }
 
+ComputeShader::ComputeShader(const std::string& filepath)
+{
+    std::ifstream stream(filepath);
+    std::stringstream ss;
+    std::string line;
+    while(getline(stream, line))
+    {
+        ss << line << '\n';
+    }
+    std::string source = ss.str();
+    const char* src = source.c_str();
+    GLCall(unsigned int id = glCreateShader(GL_COMPUTE_SHADER));
+    GLCall(glShaderSource(id, 1, &src, nullptr));
+    GLCall(glCompileShader(id));
+
+    int result;
+    GLCall(glGetShaderiv(id, GL_COMPILE_STATUS, &result));
+    if(result == GL_FALSE)
+    {
+        int lenght;
+        GLCall(glGetShaderiv(id, GL_INFO_LOG_LENGTH, &lenght));
+        char* message = (char*)alloca(lenght * sizeof(char));
+        GLCall(glGetShaderInfoLog(id, lenght, &lenght, message));
+        std::cout<<"Failed to compile compute shader"<<std::endl;
+        std::cout<<message<<std::endl;
+        GLCall(glDeleteShader(id));
+        return;
+    }
+
+    GLCall(m_rendererID = glCreateProgram());
+    GLCall(glAttachShader(m_rendererID, id));
+    GLCall(glLinkProgram(m_rendererID));
+    GLCall(glValidateProgram(m_rendererID));
+    GLCall(glDeleteShader(id));
+}
+
+void ComputeShader::Dispatch(uint32_t groups_x, uint32_t groups_y, uint32_t groups_z) const 
+{
+    GLCall(glUseProgram(m_rendererID));
+    GLCall(glDispatchCompute(groups_x, groups_y, groups_z));    
+    GLCall(glMemoryBarrier(GL_ALL_BARRIER_BITS));
+}
+

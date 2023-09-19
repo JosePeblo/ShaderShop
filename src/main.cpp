@@ -108,8 +108,43 @@ int main(void)
     shader.SetUniform1i("u_kernelSize", 3);
     gui.PushShader(shader);
     // Texture
+
+    /* ---Compute shader inputs---
+        --- BASE INPUTS ---
+        -uvec3 - sizes of the work gorups in this compute shader
+        gl_NumWorkGroups;
+
+        -uvec3 - the id of the current work group we are in
+        gl_WorkGroupID;
+
+        -uvec3 - the ID of the current invocation we are in with respect to the work group we are in
+        gl_LocalInvocationID;
+
+        --- SHORTHAND INPUTS ---
+        -uvec3 - the ID of the current invocation we are in with respect to the whole compute shader
+        // gl_GlobalInvocationID = gl_WorkGroupID * gl_WorkgroupSize + gl_invocationID
+        gl_GlobalInvocationID;
+
+        -uint - the index of the current invocation we are in with respect to the work group we are in
+        // gl_LoalInvocationIndex = 
+            gl_LocalInvocationID.z * gl_WorkGroupSize.x * gl_WorkGroupSize.y +
+            gl_LocalInvocationID.y * gl_WorkGroupSize.x +
+            gl_LocalInvocationID.z
+        gl_LocalInvocationIndex;
     
+    */
     
+
+   unsigned int screenTex;
+   GLCall(glCreateTextures(GL_TEXTURE_2D, 1, &screenTex));
+   GLCall(glTextureParameteri(screenTex, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+   GLCall(glTextureParameteri(screenTex, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+   GLCall(glTextureParameteri(screenTex, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+   GLCall(glTextureParameteri(screenTex, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+   GLCall(glTextureStorage2D(screenTex, 1, GL_RGBA32F, 640, 640));
+   GLCall(glBindImageTexture(0, screenTex, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F));
+
+    ComputeShader compute("res/shaders/tracer.glsl");
 
     GLCall(glEnable(GL_BLEND));
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
@@ -128,16 +163,19 @@ int main(void)
 
         //Bind texture
         GLCall(glActiveTexture(GL_TEXTURE0 + 0));
-        GLCall(glBindTexture(GL_TEXTURE_2D, textureID));
+        GLCall(glBindTexture(GL_TEXTURE_2D, screenTex));
+        // GLCall(glBindTexture(GL_TEXTURE_2D, textureID));
 
-
-        //Bind shader
-        // GLCall(glUseProgram(program));
+        // compute.Dispatch(width, height, 1);
+        compute.Dispatch(ceil(width / 8), ceil(height / 4), 1); // WARP optimization nvidia optimization is for 32 work groups
+        // glBindTextureUnit(0, screenTex);
+    
         shader.Bind();
         va.Bind();
         ib.Bind();
         renderer.DrawTriangleMesh(va, ib, shader);
         
+
         window.swapBuffers();
     }
 
