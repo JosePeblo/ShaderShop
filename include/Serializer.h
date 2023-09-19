@@ -63,9 +63,9 @@ class Serializer
                         break;
 
                         case UNIFORM_TYPE::INT:
-                            if(ImGui::InputInt(uniform.first.c_str(), (int*)uniform.second.data))
+                            if(ImGui::SliderInt(uniform.first.c_str(),(int*)uniform.second.data,0,30))
                             {
-                                puts(uniform.first.c_str());
+                                shad->SetUniform1i(uniform.first, *(int*)uniform.second.data);
                             }
                         break;
 

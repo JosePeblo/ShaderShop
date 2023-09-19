@@ -31,7 +31,7 @@ void validateShader(unsigned int id)
 
 int main(void)
 {
-    auto window = shl::Window(600, 600, "Hello World");
+    auto window = shl::Window(640, 640, "Hello World");
     
     if(!window.ok())
     {
@@ -82,6 +82,13 @@ int main(void)
     GLCall(glGenTextures(1, &textureID));
     GLCall(glBindTexture(GL_TEXTURE_2D, textureID));
 
+    // GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgBuffer));
+    // GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+    // GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+    // GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+    // GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+
+
     GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
     GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
     GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
@@ -98,6 +105,7 @@ int main(void)
     shader.SetUniform1f("u_brightness", 0.0f);
     shader.SetUniform1f("u_contrast", 1.0f);
     shader.SetUniform1i("u_texture", 0);
+    shader.SetUniform1i("u_kernelSize", 3);
     gui.PushShader(shader);
     // Texture
     

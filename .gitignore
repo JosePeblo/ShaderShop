@@ -1,8 +1,21 @@
+# Excecutables
 *.exe
 *.out
+
+# Libraries and compiled binaries
 *.a
 *.o
-.vscode
-imgui.ini
 *.lib
-a.cpp
+
+# vscode stuff
+.vscode
+
+# vim stuff
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+*~
+[._]*.un~
+
