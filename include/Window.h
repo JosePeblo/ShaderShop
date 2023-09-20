@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
+#include <string>
 
 namespace shl {
 
@@ -14,6 +15,12 @@ class Window
         int         m_width;
         int         m_height;
         const char* m_tile;
+
+        // FPS counter
+        double      m_prevTime = 0.0;
+        double      m_crntTime = 0.0;
+        double      m_timeDiff = 0.0;
+        uint32_t    m_counter  = 0;
 
 
         static void glfw_error_callback(int error, const char* description)
@@ -79,6 +86,17 @@ class Window
 
     void swapBuffers()
     {
+        m_crntTime = glfwGetTime();
+        m_timeDiff = m_crntTime - m_prevTime;
+        m_counter++;
+        if(m_timeDiff >= 1.0 / 30.0)
+        {
+            std::string FPS = std::to_string((1.0 / m_timeDiff) * m_counter);
+            std::string ms  = std::to_string((m_timeDiff / m_counter) * 1000);
+            std::string title = FPS + "fps / " + ms + "ms";
+            glfwSetWindowTitle(m_window, title.c_str());
+        }
+
         /* Swap front and back buffers */
         glfwSwapBuffers(m_window);
     }
