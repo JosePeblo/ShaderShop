@@ -133,7 +133,6 @@ int main(void)
         gl_LocalInvocationIndex;
     
     */
-    
 
    unsigned int screenTex;
    GLCall(glCreateTextures(GL_TEXTURE_2D, 1, &screenTex));
@@ -141,13 +140,24 @@ int main(void)
    GLCall(glTextureParameteri(screenTex, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
    GLCall(glTextureParameteri(screenTex, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
    GLCall(glTextureParameteri(screenTex, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-   GLCall(glTextureStorage2D(screenTex, 1, GL_RGBA32F, 640, 640));
+   GLCall(glTextureStorage2D(screenTex, 1, GL_RGBA32F, width, height));
    GLCall(glBindImageTexture(0, screenTex, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F));
 
-    ComputeShader compute("res/shaders/tracer.glsl");
+    ComputeShader compute("res/shaders/blur.comp");
 
     GLCall(glEnable(GL_BLEND));
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+    GLCall(glActiveTexture(GL_TEXTURE0 + 0));
+    GLCall(glBindTexture(GL_TEXTURE_2D, screenTex));
+    GLCall(glActiveTexture(GL_TEXTURE0 + 1));
+    GLCall(glBindTexture(GL_TEXTURE_2D, textureID));
+    gui.PushShader(compute);
+    compute.SetUniform1i("u_texture", 1);
+    compute.SetUniform1f("u_sum", 0.2);
+    compute.SetUniform1i("u_kernelSize", 3);
+
+    // compute.Dispatch(640, 640, 1); 
 
     Renderer renderer;
 
@@ -165,9 +175,9 @@ int main(void)
         GLCall(glActiveTexture(GL_TEXTURE0 + 0));
         GLCall(glBindTexture(GL_TEXTURE_2D, screenTex));
         // GLCall(glBindTexture(GL_TEXTURE_2D, textureID));
-
-        // compute.Dispatch(width, height, 1);
+        compute.Bind();
         compute.Dispatch(ceil(width / 8), ceil(height / 4), 1); // WARP optimization nvidia optimization is for 32 work groups
+        // compute.Dispatch(width, height, 1);
         // glBindTextureUnit(0, screenTex);
     
         shader.Bind();

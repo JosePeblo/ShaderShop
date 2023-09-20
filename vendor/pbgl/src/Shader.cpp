@@ -87,6 +87,7 @@ void Shader::Unbind() const
 
 GLint Shader::GetUniformLocation(const std::string& name) const
 {
+    this->Bind();
     if(m_uniformLocationCache.find(name) != m_uniformLocationCache.end())
         return m_uniformLocationCache[name].location;
     
@@ -318,6 +319,8 @@ unsigned int Shader::CompileShader(unsigned int type, const std::string& source)
 
 ComputeShader::ComputeShader(const std::string& filepath)
 {
+    m_filePath = filepath;
+    m_rendererID = 0;
     std::ifstream stream(filepath);
     std::stringstream ss;
     std::string line;
@@ -356,6 +359,8 @@ void ComputeShader::Dispatch(uint32_t groups_x, uint32_t groups_y, uint32_t grou
 {
     GLCall(glUseProgram(m_rendererID));
     GLCall(glDispatchCompute(groups_x, groups_y, groups_z));    
-    GLCall(glMemoryBarrier(GL_ALL_BARRIER_BITS));
+    // GLCall(glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT));
+    // GLCall(glMemoryBarrier(GL_ALL_BARRIER_BITS));
+
 }
 

@@ -1,0 +1,56 @@
+#version 460 core
+// layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in; // WARP optimization
+layout(rgba32f, binding = 0) uniform image2D screen;
+layout(rgba32f, binding = 1) uniform sampler2D u_texture;
+uniform float u_sum;
+uniform int u_kernelSize;
+
+// void main()
+// {
+//     // ivec2 pixel_coords = ivec2(gl_LocalInvocationID.xy);
+//     ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy); // WARP optimization
+//     ivec2 dims = imageSize(screen);
+//     vec2 uv = vec2( float(pixel_coords.x) / dims.x, float(pixel_coords.y) / dims.y );
+//     vec4 pixel = texture(u_texture, uv);
+//     pixel.rgb += u_sum;
+//     imageStore(screen, pixel_coords, pixel);
+//     // imageStore(screen, ivec2( 0,0 ), vec4( 1.0, 1.0, 0.0, 1.0 ));
+// };
+
+void main()
+{
+    // ivec2 pixel_coords = ivec2(gl_LocalInvocationID.xy);
+    ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy); // WARP optimization
+    ivec2 dims = imageSize(screen);
+    vec2 uv = vec2( float(pixel_coords.x) / dims.x, float(pixel_coords.y) / dims.y );
+    vec2 src_size = vec2(1.0 / dims.x, 1.0 / dims.y);
+    if(u_kernelSize <= 0)
+    {
+        imageStore(screen, pixel_coords, texture(u_texture, uv));
+        return;
+    }
+
+
+    vec3 mean = vec3(0.0);
+    int n = (u_kernelSize * 2 + 1) * (u_kernelSize * 2 + 1);
+    // int n = 0;
+
+
+    for(int j = -u_kernelSize; j <= u_kernelSize; ++j)
+    {
+        for(int i = -u_kernelSize; i <= u_kernelSize; ++i)
+        {
+            mean += texture(u_texture, uv + vec2(i, j) * src_size).rgb;
+            // n++;
+        }
+    }
+
+    //  texture( colorTexture,( gl_FragCoord.xy + (vec2(i, j) * separation))/ texSize).rgb;
+
+    mean /= n;
+
+    vec4 pixel = vec4(mean, 1);
+    // vec4 pixel = texture(u_texture, uv + vec2(1,1));
+    imageStore(screen, pixel_coords, pixel);
+};

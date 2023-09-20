@@ -56,6 +56,7 @@ class Serializer
             {
                 for(const auto& uniform : shad->GetUniformCache())
                 {
+                    std::string tag = uniform.first + "##" + shad->GetPath();
                     switch (uniform.second.type)
                     {
                         case UNIFORM_TYPE::NONE:
@@ -63,7 +64,7 @@ class Serializer
                         break;
 
                         case UNIFORM_TYPE::INT:
-                            if(ImGui::SliderInt(uniform.first.c_str(),(int*)uniform.second.data,0,30))
+                            if(ImGui::SliderInt(tag.c_str(),(int*)uniform.second.data,0,30))
                             {
                                 shad->SetUniform1i(uniform.first, *(int*)uniform.second.data);
                             }
@@ -71,7 +72,7 @@ class Serializer
 
                         case UNIFORM_TYPE::FLOAT:
                         
-                            if(ImGui::SliderFloat(uniform.first.c_str(), (float*)uniform.second.data, -1.0f, 5.0f))
+                            if(ImGui::SliderFloat(tag.c_str(), (float*)uniform.second.data, -1.0f, 5.0f))
                             {
                                 shad->SetUniform1f(uniform.first, *(float*)uniform.second.data);
                             }
